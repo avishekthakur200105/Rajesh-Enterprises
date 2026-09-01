@@ -10,6 +10,7 @@ export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const addItem = useCartStore(state => state.addItem);
+  const { isAdmin } = useAuthStore();
   
   const [product, setProduct] = useState<any>(null);
   const [variants, setVariants] = useState<any[]>([]);
@@ -68,11 +69,21 @@ export default function ProductDetail() {
     async function fetchProduct() {
       try {
         if (!import.meta.env.VITE_SUPABASE_URL) return;
-        const { data: prod } = await supabase
+        let { data: prod } = await supabase
           .from('products')
           .select('*, image_url:product_images(url), category:categories(name)')
           .eq('slug', slug)
           .single();
+          
+        if (!prod && slug && slug.match(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)) {
+          // Fallback if the slug is actually an ID (from old cart items)
+          const { data: prodById } = await supabase
+            .from('products')
+            .select('*, image_url:product_images(url), category:categories(name)')
+            .eq('id', slug)
+            .single();
+          prod = prodById;
+        }
 
         if (prod) {
           setProduct(prod);
@@ -110,6 +121,7 @@ export default function ProductDetail() {
     addItem({
       id: selectedVariant ? selectedVariant.id : product.id,
       productId: product.id,
+      slug: product.slug,
       name: product.title,
       variantName: selectedVariant?.name,
       price: Number(price),
@@ -136,6 +148,7 @@ export default function ProductDetail() {
     addItem({
       id: selectedVariant ? selectedVariant.id : product.id,
       productId: product.id,
+      slug: product.slug,
       name: product.title,
       variantName: selectedVariant?.name,
       price: Number(price),

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSettingsStore } from '../../store/settings';
 import { useCartStore } from '../../store/cart';
+import { useAuthStore } from '../../store/auth';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/utils';
 import { ArrowRight, Leaf, ShieldCheck, Truck, Sprout, Languages, ShoppingCart } from 'lucide-react';
@@ -87,6 +88,7 @@ export default function Home() {
     addItem({
       id: product.id,
       productId: product.id,
+      slug: product.slug,
       name: product.title,
       price: Number(price),
       quantity: 1,
@@ -108,6 +110,7 @@ export default function Home() {
     addItem({
       id: product.id,
       productId: product.id,
+      slug: product.slug,
       name: product.title,
       price: Number(price),
       quantity: 1,

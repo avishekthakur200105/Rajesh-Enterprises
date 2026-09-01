@@ -12,6 +12,7 @@ export default function StorefrontLayout() {
   const { settings, fetchSettings } = useSettingsStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -83,11 +84,61 @@ export default function StorefrontLayout() {
               </Link>
               )}
               
-              <button className="md:hidden text-stone-600 hover:text-green-700">
-                <Menu className="h-6 w-6" />
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden text-stone-600 hover:text-green-700"
+              >
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
+
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-stone-100 bg-white absolute w-full z-40 shadow-md">
+              <div className="px-4 pt-2 pb-4 space-y-1">
+                <Link 
+                  to="/" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-green-700 hover:bg-green-50"
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/shop" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-green-700 hover:bg-green-50"
+                >
+                  Shop
+                </Link>
+                {user ? (
+                  <Link 
+                    to="/account" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-green-700 hover:bg-green-50"
+                  >
+                    My Account
+                  </Link>
+                ) : (
+                  <Link 
+                    to="/login" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-green-700 hover:bg-green-50"
+                  >
+                    Login
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link 
+                    to="/admin" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-stone-700 hover:text-green-700 hover:bg-green-50"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
 
           {isSearchOpen && (
             <div className="border-t border-stone-100 py-3 px-4 md:px-0 animate-in fade-in slide-in-from-top-2">

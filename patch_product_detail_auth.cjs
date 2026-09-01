@@ -1,41 +1,54 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/pages/storefront/ProductDetail.tsx', 'utf8');
 
-if (!code.includes("useAuthStore")) {
-  code = code.replace(
-    "import { useCartStore } from '../../store/cart';",
-    "import { useCartStore } from '../../store/cart';\nimport { useAuthStore } from '../../store/auth';"
-  );
-  
-  code = code.replace(
-    "const { addItem } = useCartStore();",
-    "const { addItem } = useCartStore();\n  const { isAdmin } = useAuthStore();"
-  );
-}
+const search = `  const addItem = useCartStore(state => state.addItem);`;
+const replace = `  const addItem = useCartStore(state => state.addItem);
+  const { isAdmin } = useAuthStore();`;
 
-const actionsSearch = `{/* Actions */}
-            <div className="bg-stone-50 p-4 sm:p-5 rounded-xl border border-stone-100 mb-6 max-w-lg">`;
+code = code.replace(search, replace);
 
-const actionsReplace = `{/* Actions */}
-            {!isAdmin ? (
-              <div className="bg-orange-50 p-4 sm:p-5 rounded-xl border border-orange-100 mb-6 max-w-lg">
-                <p className="text-orange-800 text-sm font-medium">Purchasing is currently restricted to administrators only.</p>
-              </div>
-            ) : (
-            <div className="bg-stone-50 p-4 sm:p-5 rounded-xl border border-stone-100 mb-6 max-w-lg">`;
+const buttonSearch = `                <div className="flex gap-2">
+                  <button 
+                    disabled={addingToCart || isOutOfStock}
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-green-50 text-green-700 border border-green-700 hover:bg-green-100 disabled:bg-stone-100 disabled:text-stone-400 disabled:border-stone-200 disabled:cursor-not-allowed h-11 rounded-lg font-bold flex items-center justify-center transition-colors whitespace-nowrap px-3 text-sm"
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    {addingToCart ? 'Adding...' : 'Add to Cart'}
+                  </button>
+                  <button 
+                    disabled={isOutOfStock}
+                    onClick={handleBuyNow}
+                    className="flex-1 bg-green-700 hover:bg-green-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white h-11 rounded-lg font-bold flex items-center justify-center transition-colors whitespace-nowrap px-3 text-sm"
+                  >
+                    Buy Now
+                  </button>
+                </div>`;
 
-const actionsEndSearch = `              </div>
-            </div>
+const buttonReplace = `                {isAdmin ? (
+                  <div className="flex gap-2">
+                    <button 
+                      disabled={addingToCart || isOutOfStock}
+                      onClick={handleAddToCart}
+                      className="flex-1 bg-green-50 text-green-700 border border-green-700 hover:bg-green-100 disabled:bg-stone-100 disabled:text-stone-400 disabled:border-stone-200 disabled:cursor-not-allowed h-11 rounded-lg font-bold flex items-center justify-center transition-colors whitespace-nowrap px-3 text-sm"
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      {addingToCart ? 'Adding...' : 'Add to Cart'}
+                    </button>
+                    <button 
+                      disabled={isOutOfStock}
+                      onClick={handleBuyNow}
+                      className="flex-1 bg-green-700 hover:bg-green-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white h-11 rounded-lg font-bold flex items-center justify-center transition-colors whitespace-nowrap px-3 text-sm"
+                    >
+                      Buy Now
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-stone-100 p-4 rounded-md text-sm text-stone-600 text-center">
+                    Purchasing is restricted to administrators only.
+                  </div>
+                )}`;
 
-            {/* Description */}`;
-
-const actionsEndReplace = `              </div>
-            </div>
-            )}
-
-            {/* Description */}`;
-
-code = code.replace(actionsSearch, actionsReplace);
-code = code.replace(actionsEndSearch, actionsEndReplace);
+code = code.replace(buttonSearch, buttonReplace);
 
 fs.writeFileSync('src/pages/storefront/ProductDetail.tsx', code);

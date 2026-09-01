@@ -13,7 +13,15 @@ export default function Cart() {
   const { isAdmin } = useAuthStore();
 
   if (!isAdmin) {
-    return <Navigate to="/shop" replace />;
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-24 text-center">
+        <h2 className="text-2xl font-bold text-stone-800 mb-4">Restricted Access</h2>
+        <p className="text-stone-600 mb-8">Purchasing is currently restricted to administrators only.</p>
+        <Link to="/shop" className="bg-green-700 text-white px-6 py-3 rounded-md font-medium hover:bg-green-800 transition-colors">
+          Return to Shop
+        </Link>
+      </div>
+    );
   }
 
   let deliveryCharge = settings?.deliveryCharge || 150;
@@ -50,7 +58,7 @@ export default function Cart() {
               <ul className="divide-y divide-stone-200">
                 {items.map((item) => (
                   <li key={item.id} className="p-6 flex flex-col sm:flex-row gap-6">
-                    <Link to={`/product/${item.productId}`} className="w-full sm:w-24 h-24 bg-stone-50 rounded-lg flex items-center justify-center border border-stone-100 flex-shrink-0">
+                    <Link to={`/products/${item.slug || item.productId}`} className="w-full sm:w-24 h-24 bg-stone-50 rounded-lg flex items-center justify-center border border-stone-100 flex-shrink-0">
                        {item.image ? (
                          <img src={item.image} alt={item.name} className="w-full h-full object-contain mix-blend-multiply p-2" />
                        ) : (
@@ -62,7 +70,7 @@ export default function Cart() {
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-semibold text-stone-800 text-lg">
-                            <Link to={`/product/${item.productId}`} className="hover:text-green-700">{item.name}</Link>
+                            <Link to={`/products/${item.slug || item.productId}`} className="hover:text-green-700">{item.name}</Link>
                           </h3>
                           {item.variantName && (
                             <p className="text-sm text-stone-500 mt-1">Option: {item.variantName}</p>

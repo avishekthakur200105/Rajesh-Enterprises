@@ -21,13 +21,13 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminOrders from './pages/admin/Orders';
 
-import AdminCategories from './pages/admin/categories';
-import AdminCustomers from './pages/admin/customers';
-import AdminReviews from './pages/admin/reviews';
-import AdminSettings from './pages/admin/settings';
-import AdminBanners from './pages/admin/banners';
-import AdminTips from './pages/admin/tips';
-import AdminMessages from './pages/admin/messages';
+import AdminCategories from './pages/admin/categories/index';
+import AdminCustomers from './pages/admin/customers/index';
+import AdminReviews from './pages/admin/reviews/index';
+import AdminSettings from './pages/admin/settings/index';
+import AdminBanners from './pages/admin/banners/index';
+import AdminTips from './pages/admin/tips/index';
+import AdminMessages from './pages/admin/messages/index';
 
 import About from './pages/storefront/About';
 import Contact from './pages/storefront/Contact';
@@ -37,7 +37,7 @@ import Terms from './pages/storefront/Terms';
 import Privacy from './pages/storefront/Privacy';
 import ShippingPolicy from './pages/storefront/ShippingPolicy';
 import ReturnPolicy from './pages/storefront/ReturnPolicy';
-import AccountDashboard from './pages/storefront/account';
+import AccountDashboard from './pages/storefront/account/index';
 
 function App() {
   const { setUser } = useAuthStore();
