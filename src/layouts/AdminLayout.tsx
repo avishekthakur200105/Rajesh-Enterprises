@@ -12,7 +12,8 @@ import {
   Tags,
   Sprout,
   Image as ImageIcon,
-  MessageSquare
+  MessageSquare,
+  Star
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
@@ -43,6 +44,7 @@ export default function AdminLayout() {
     { name: 'Categories', path: '/admin/categories', icon: Tags },
     { name: 'Banners', path: '/admin/banners', icon: ImageIcon },
     { name: 'Customers', path: '/admin/customers', icon: Users },
+    { name: 'Reviews', path: '/admin/reviews', icon: Star },
     { name: 'Farmer Tips', path: '/admin/tips', icon: Lightbulb },
     { name: 'Messages', path: '/admin/messages', icon: MessageSquare },
     { name: 'Settings', path: '/admin/settings', icon: Settings },

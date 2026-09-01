@@ -19,12 +19,7 @@ export default function Shop() {
       try {
         if (!import.meta.env.VITE_SUPABASE_URL) return;
         
-        // Fetch categories
-        const { data: cats } = await supabase.from('categories').select('*').eq('is_active', true);
-        if (cats) setCategories(cats);
-
-        // Fetch products
-        let query = supabase
+                let query = supabase
           .from('products')
           .select('id, title, slug, regular_price, discount_price, image_url:product_images(url), category:categories(name, slug)')
           .eq('is_active', true);
@@ -33,12 +28,15 @@ export default function Shop() {
           query = query.ilike('title', `%${searchQuery}%`);
         }
         if (categoryParam) {
-          // Note: In a real app, we'd join on category slug properly.
-          // For simplicity here, we assume category fetching is handled.
-          // query = query.eq('category.slug', categoryParam); // This needs proper PostgREST syntax
+          // Join on category handled in real app
         }
 
-        const { data } = await query;
+        const [ { data: cats }, { data } ] = await Promise.all([
+          supabase.from('categories').select('*').eq('is_active', true),
+          query
+        ]);
+
+        if (cats) setCategories(cats);
         if (data) setProducts(data);
       } catch (e) {
         console.error(e);

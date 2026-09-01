@@ -1,12 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cart';
+import { useSettingsStore } from '../../store/settings';
 import { formatCurrency } from '../../lib/utils';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, getSummary } = useCartStore();
-  const { subtotal, discount, total } = getSummary();
+  const { subtotal, discount } = getSummary();
   const navigate = useNavigate();
+  const { settings } = useSettingsStore();
+
+  let deliveryCharge = settings?.deliveryCharge || 150;
+  if (settings?.deliveryDiscountThreshold && subtotal >= settings.deliveryDiscountThreshold && settings.discountedDeliveryCharge !== undefined) {
+    deliveryCharge = settings.discountedDeliveryCharge;
+  }
+  const total = subtotal - discount + deliveryCharge;
 
   if (items.length === 0) {
     return (
@@ -109,7 +117,7 @@ export default function Cart() {
                 )}
                 <div className="flex justify-between text-stone-600">
                   <span>Delivery Charge</span>
-                  <span className="text-stone-400">Calculated at checkout</span>
+                  <span className="font-medium text-stone-900">{formatCurrency(deliveryCharge)}</span>
                 </div>
               </div>
               

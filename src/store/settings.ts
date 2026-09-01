@@ -8,6 +8,9 @@ export interface StoreSettings {
   address: string;
   description: string;
   topBarText: string;
+  deliveryCharge: number;
+  discountedDeliveryCharge?: number;
+  deliveryDiscountThreshold?: number;
 }
 
 const defaultSettings: StoreSettings = {
@@ -16,7 +19,10 @@ const defaultSettings: StoreSettings = {
   email: "info@rajeshenterprises.com",
   address: "Kathmandu, Nepal",
   description: "Your trusted partner in agriculture. Supplying top quality seeds, fertilizers, and farming equipment across Nepal.",
-  topBarText: "Welcome to Rajesh Enterprises - Your Trusted Nepal Agro Pharmacy"
+  topBarText: "Welcome to Rajesh Enterprises - Your Trusted Nepal Agro Pharmacy",
+  deliveryCharge: 150,
+  discountedDeliveryCharge: 100,
+  deliveryDiscountThreshold: 5000,
 };
 
 interface SettingsState {

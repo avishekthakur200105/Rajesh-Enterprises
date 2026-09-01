@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Rajesh Enterprises",
+  "description": "E-commerce store for Rajesh Enterprises",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

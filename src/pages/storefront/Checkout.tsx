@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cart';
 import { useAuthStore } from '../../store/auth';
+import { useSettingsStore } from '../../store/settings';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/utils';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, CreditCard, Banknote } from 'lucide-react';
+import { CheckCircle2, CreditCard, Banknote, Star, X } from 'lucide-react';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -17,7 +18,7 @@ const checkoutSchema = z.object({
   municipality: z.string().min(1, 'Municipality is required'),
   streetTole: z.string().min(1, 'Street/Tole is required'),
   landmark: z.string().optional(),
-  paymentMethod: z.enum(['cod', 'bank_transfer', 'esewa']),
+  
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
@@ -27,19 +28,27 @@ export default function Checkout() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const { subtotal } = getSummary();
-  const [deliveryCharge] = useState(150); // Hardcoded for demo
-  const total = subtotal + deliveryCharge;
+  
+  const { settings } = useSettingsStore();
+  let deliveryCharge = settings?.deliveryCharge || 150;
+  
+  if (settings?.deliveryDiscountThreshold && subtotal >= settings.deliveryDiscountThreshold && settings.discountedDeliveryCharge !== undefined) {
+    deliveryCharge = settings.discountedDeliveryCharge;
+  }
+
+  const total = subtotal - (getSummary().discount || 0) + deliveryCharge;
   const [placingOrder, setPlacingOrder] = useState(false);
   const [orderComplete, setOrderComplete] = useState<string | null>(null);
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
+  const [showReviewPopup, setShowReviewPopup] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ productId: '', name: '', rating: 5, comment: '' });
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      paymentMethod: 'cod'
-    }
+    defaultValues: {}
   });
 
-  const paymentMethod = watch('paymentMethod');
+  
 
   if (items.length === 0 && !orderComplete) {
     navigate('/cart');
@@ -56,9 +65,115 @@ export default function Checkout() {
         <button onClick={() => navigate('/shop')} className="bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-full transition-colors">
           Continue Shopping
         </button>
+
+        {showReviewPopup && purchasedItems.length > 0 && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden text-left relative animate-in fade-in zoom-in duration-200">
+              <div className="p-6 border-b border-stone-100 bg-stone-50">
+                <button onClick={() => setShowReviewPopup(false)} className="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+                  <X className="h-5 w-5" />
+                </button>
+                <h3 className="text-xl font-bold text-stone-800 flex items-center gap-2">
+                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  Rate Your Purchase
+                </h3>
+                <p className="text-stone-500 text-sm mt-1">Share your experience with other farmers.</p>
+              </div>
+              
+              <form onSubmit={handleSubmitReview} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Select Product</label>
+                  <select 
+                    required
+                    value={reviewForm.productId}
+                    onChange={(e) => setReviewForm({...reviewForm, productId: e.target.value})}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  >
+                    <option value="">-- Choose a product --</option>
+                    {purchasedItems.map(item => (
+                      <option key={item.productId} value={item.productId}>{item.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={reviewForm.name}
+                    onChange={(e) => setReviewForm({...reviewForm, name: e.target.value})}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewForm({...reviewForm, rating: star})}
+                        className="focus:outline-none"
+                      >
+                        <Star className={`h-8 w-8 ${reviewForm.rating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-stone-300'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">Your Review</label>
+                  <textarea 
+                    required
+                    rows={3}
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    placeholder="Tell us what you think..."
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-4 rounded-md transition-colors"
+                  >
+                    Submit Review
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
+
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewForm.productId || !reviewForm.name || !reviewForm.comment) return;
+    
+    const review = {
+      id: Date.now(),
+      name: reviewForm.name,
+      rating: reviewForm.rating,
+      comment: reviewForm.comment,
+      date: new Date().toLocaleDateString(),
+      productId: reviewForm.productId
+    };
+    
+    const storageKey = `reviews_${reviewForm.productId}`;
+    const existingReviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const updatedReviews = [review, ...existingReviews];
+    localStorage.setItem(storageKey, JSON.stringify(updatedReviews));
+    
+    alert('Thank you for your review!');
+    setShowReviewPopup(false);
+  };
 
   const onSubmit = async (data: CheckoutForm) => {
     setPlacingOrder(true);
@@ -66,7 +181,9 @@ export default function Checkout() {
       if (!import.meta.env.VITE_SUPABASE_URL) {
         // Mock successful order if no DB configured
         setTimeout(() => {
+          setPurchasedItems([...items]);
           setOrderComplete('RE-MOCK-000001');
+          setShowReviewPopup(true);
           clearCart();
         }, 1500);
         return;
@@ -79,7 +196,7 @@ export default function Checkout() {
         subtotal: subtotal,
         delivery_charge: deliveryCharge,
         total: total,
-        payment_method: data.paymentMethod,
+        payment_method: 'cod',
         shipping_address: {
           fullName: data.fullName,
           phone: data.phone,
@@ -117,7 +234,9 @@ export default function Checkout() {
 
       if (itemsError) throw itemsError;
 
+      setPurchasedItems([...items]);
       setOrderComplete(orderResponse.order_number || orderResponse.id);
+      setShowReviewPopup(true);
       clearCart();
 
     } catch (e) {
@@ -177,33 +296,6 @@ export default function Checkout() {
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-stone-800 mb-6 border-b border-stone-100 pb-4">Payment Method</h2>
-              <div className="space-y-4">
-                <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'cod' ? 'border-green-600 bg-green-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                  <input type="radio" value="cod" {...register('paymentMethod')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300" />
-                  <div className="ml-4 flex items-center">
-                    <Banknote className="h-6 w-6 text-stone-500 mr-3" />
-                    <span className="font-medium text-stone-800">Cash on Delivery</span>
-                  </div>
-                </label>
-                <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'bank_transfer' ? 'border-green-600 bg-green-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                  <input type="radio" value="bank_transfer" {...register('paymentMethod')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300" />
-                  <div className="ml-4 flex items-center">
-                    <CreditCard className="h-6 w-6 text-stone-500 mr-3" />
-                    <span className="font-medium text-stone-800">Bank Transfer</span>
-                  </div>
-                </label>
-                 <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'esewa' ? 'border-green-600 bg-green-50' : 'border-stone-200 hover:bg-stone-50'}`}>
-                  <input type="radio" value="esewa" {...register('paymentMethod')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300" />
-                  <div className="ml-4 flex items-center">
-                    <div className="h-6 w-6 bg-green-600 text-white rounded flex items-center justify-center font-bold text-xs mr-3">e</div>
-                    <span className="font-medium text-stone-800">eSewa / Online Wallet</span>
-                  </div>
-                </label>
-              </div>
-            </div>
           </div>
 
           {/* Summary */}
