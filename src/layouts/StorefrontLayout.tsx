@@ -72,6 +72,7 @@ export default function StorefrontLayout() {
                 )}
               </div>
 
+              {isAdmin && (
               <Link to="/cart" className="text-stone-600 hover:text-green-700 relative">
                 <ShoppingCart className="h-5 w-5" />
                 {cartCount > 0 && (
@@ -80,6 +81,7 @@ export default function StorefrontLayout() {
                   </span>
                 )}
               </Link>
+              )}
               
               <button className="md:hidden text-stone-600 hover:text-green-700">
                 <Menu className="h-6 w-6" />

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/utils';
 import { useCartStore } from '../../store/cart';
+import { useAuthStore } from '../../store/auth';
 import { Leaf, Minus, Plus, ShoppingCart, CheckCircle2, Star } from 'lucide-react';
 
 export default function ProductDetail() {
@@ -234,6 +235,11 @@ export default function ProductDetail() {
             )}
 
             {/* Actions */}
+            {!isAdmin ? (
+              <div className="bg-orange-50 p-4 sm:p-5 rounded-xl border border-orange-100 mb-6 max-w-lg">
+                <p className="text-orange-800 text-sm font-medium">Purchasing is currently restricted to administrators only.</p>
+              </div>
+            ) : (
             <div className="bg-stone-50 p-4 sm:p-5 rounded-xl border border-stone-100 mb-6 max-w-lg">
               <div className="flex items-center justify-between mb-3">
                 <span className="font-medium text-stone-700 text-sm">Quantity</span>
@@ -284,8 +290,7 @@ export default function ProductDetail() {
                 </div>
               </div>
             </div>
-
-
+            )}
 
           </div>
         </div>

@@ -35,6 +35,29 @@ export default function AdminOrders() {
     }
   };
 
+  const handleDeleteOrder = async () => {
+    if (!selectedOrder || selectedOrder.status !== 'cancelled') return;
+    if (!confirm('Are you sure you want to permanently delete this cancelled order?')) return;
+    
+    setUpdatingStatus(true);
+    try {
+      // Delete order items first due to foreign key constraints if no cascade
+      await supabase.from('order_items').delete().eq('order_id', selectedOrder.id);
+      
+      const { error } = await supabase.from('orders').delete().eq('id', selectedOrder.id);
+      if (error) throw error;
+      
+      setIsModalOpen(false);
+      setSelectedOrder(null);
+      fetchOrders();
+    } catch (error) {
+      console.error("Error deleting order", error);
+      alert("Failed to delete order");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const handleUpdateStatus = async (status: string) => {
     if (!selectedOrder) return;
     setUpdatingStatus(true);
@@ -282,9 +305,20 @@ export default function AdminOrders() {
                 </select>
                 {updatingStatus && <span className="text-xs text-stone-500 ml-2">Saving...</span>}
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-stone-200 text-stone-800 rounded-md text-sm font-medium hover:bg-stone-300 transition-colors">
-                Close
-              </button>
+              <div className="flex space-x-2">
+                {selectedOrder.status === 'cancelled' && (
+                  <button 
+                    onClick={handleDeleteOrder} 
+                    disabled={updatingStatus}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+                  >
+                    Delete Order
+                  </button>
+                )}
+                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-stone-200 text-stone-800 rounded-md text-sm font-medium hover:bg-stone-300 transition-colors">
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

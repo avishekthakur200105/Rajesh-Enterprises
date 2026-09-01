@@ -25,8 +25,12 @@ type CheckoutForm = z.infer<typeof checkoutSchema>;
 
 export default function Checkout() {
   const { items, getSummary, clearCart } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, isAdmin } = useAuthStore();
   const navigate = useNavigate();
+  if (!isAdmin) {
+    return <Navigate to="/shop" replace />;
+  }
+
   const { subtotal } = getSummary();
   
   const { settings } = useSettingsStore();

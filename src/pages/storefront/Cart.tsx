@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/auth';
 import { useCartStore } from '../../store/cart';
 import { useSettingsStore } from '../../store/settings';
 import { formatCurrency } from '../../lib/utils';
@@ -9,6 +10,11 @@ export default function Cart() {
   const { subtotal, discount } = getSummary();
   const navigate = useNavigate();
   const { settings } = useSettingsStore();
+  const { isAdmin } = useAuthStore();
+
+  if (!isAdmin) {
+    return <Navigate to="/shop" replace />;
+  }
 
   let deliveryCharge = settings?.deliveryCharge || 150;
   if (settings?.deliveryDiscountThreshold && subtotal >= settings.deliveryDiscountThreshold && settings.discountedDeliveryCharge !== undefined) {
