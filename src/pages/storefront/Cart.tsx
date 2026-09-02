@@ -12,17 +12,7 @@ export default function Cart() {
   const { settings } = useSettingsStore();
   const { isAdmin } = useAuthStore();
 
-  if (!isAdmin) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-bold text-stone-800 mb-4">Restricted Access</h2>
-        <p className="text-stone-600 mb-8">Purchasing is currently restricted to administrators only.</p>
-        <Link to="/shop" className="bg-green-700 text-white px-6 py-3 rounded-md font-medium hover:bg-green-800 transition-colors">
-          Return to Shop
-        </Link>
-      </div>
-    );
-  }
+
 
   let deliveryCharge = settings?.deliveryCharge || 150;
   if (settings?.deliveryDiscountThreshold && subtotal >= settings.deliveryDiscountThreshold && settings.discountedDeliveryCharge !== undefined) {

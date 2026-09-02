@@ -27,17 +27,7 @@ export default function Checkout() {
   const { items, getSummary, clearCart } = useCartStore();
   const { user, isAdmin } = useAuthStore();
   const navigate = useNavigate();
-  if (!isAdmin) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-bold text-stone-800 mb-4">Restricted Access</h2>
-        <p className="text-stone-600 mb-8">Purchasing is currently restricted to administrators only.</p>
-        <button onClick={() => navigate('/shop')} className="bg-green-700 text-white px-6 py-3 rounded-md font-medium hover:bg-green-800 transition-colors">
-          Return to Shop
-        </button>
-      </div>
-    );
-  }
+
 
   const { subtotal } = getSummary();
   
