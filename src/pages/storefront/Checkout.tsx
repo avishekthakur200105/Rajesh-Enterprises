@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cart';
 import { useAuthStore } from '../../store/auth';
@@ -52,8 +52,13 @@ export default function Checkout() {
 
   
 
+  useEffect(() => {
+    if (items.length === 0 && !orderComplete) {
+      navigate('/cart', { replace: true });
+    }
+  }, [items.length, orderComplete, navigate]);
+
   if (items.length === 0 && !orderComplete) {
-    navigate('/cart');
     return null;
   }
 

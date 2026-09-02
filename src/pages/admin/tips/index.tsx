@@ -50,7 +50,7 @@ export default function AdminTips() {
         name: 'Farmer Tips',
         slug: '_farmer_tips_',
         description: JSON.stringify(newTips),
-        is_active: false
+        is_active: true
       };
       
       const { data } = await supabase.from('categories').select('id').eq('slug', '_farmer_tips_').single();

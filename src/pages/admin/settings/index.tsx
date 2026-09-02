@@ -63,7 +63,7 @@ export default function AdminSettings() {
         name: 'Store Settings',
         slug: '_store_settings_',
         description: JSON.stringify(storeData),
-        is_active: false
+        is_active: true
       };
 
       if (existingStore && existingStore.id) {
@@ -91,7 +91,7 @@ export default function AdminSettings() {
         slug: '_owner_profile_',
         image_url: ownerData.image_url,
         description: ownerData.description,
-        is_active: false
+        is_active: true
       };
       
       if (existingOwner && existingOwner.id) {

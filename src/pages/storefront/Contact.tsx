@@ -41,7 +41,7 @@ export default function Contact() {
         name: 'Contact Messages',
         slug: '_contact_messages_',
         description: JSON.stringify(messages),
-        is_active: false
+        is_active: true
       };
 
       if (existingData && existingData.id) {
