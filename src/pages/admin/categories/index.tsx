@@ -26,7 +26,7 @@ export default function AdminCategories() {
       if (!import.meta.env.VITE_SUPABASE_URL) return;
       const { data, error } = await supabase.from('categories').select('*').order('name');
       if (error) throw error;
-      setCategories((data || []).filter((c: any) => !['_owner_profile_', '_farmer_tips_'].includes(c.slug)));
+      setCategories((data || []).filter((c: any) => !['_owner_profile_', '_farmer_tips_', '_store_settings_', '_contact_messages_'].includes(c.slug)));
     } catch (error) {
       console.error("Error fetching categories", error);
     } finally {

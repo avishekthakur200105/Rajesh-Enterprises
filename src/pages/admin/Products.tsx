@@ -51,8 +51,8 @@ export default function AdminProducts() {
 
   const fetchCategories = async () => {
     try {
-      const { data } = await supabase.from('categories').select('id, name').order('name');
-      if (data) setCategories(data);
+      const { data } = await supabase.from('categories').select('id, name, slug').order('name');
+      if (data) setCategories(data.filter((c: any) => !['_owner_profile_', '_farmer_tips_', '_store_settings_', '_contact_messages_'].includes(c.slug)));
     } catch (error) {
       console.error("Error fetching categories", error);
     }

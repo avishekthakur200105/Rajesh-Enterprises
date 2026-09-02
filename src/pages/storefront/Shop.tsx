@@ -36,7 +36,7 @@ export default function Shop() {
           query
         ]);
 
-        if (cats) setCategories(cats);
+        if (cats) setCategories(cats.filter((c: any) => !['_owner_profile_', '_farmer_tips_', '_store_settings_', '_contact_messages_'].includes(c.slug)));
         if (data) setProducts(data);
       } catch (e) {
         console.error(e);
