@@ -1,22 +1,54 @@
 const fs = require('fs');
+
 let code = fs.readFileSync('src/pages/storefront/Shop.tsx', 'utf8');
 
-// Categories Section Sidebar
-code = code.replace("w-full lg:w-64 flex-shrink-0", "w-full lg:w-56 flex-shrink-0");
-code = code.replace("mb-6 pb-4", "mb-4 pb-3");
+const search = `        let query = supabase
+          .from('products')
+          .select('id, title, slug, regular_price, discount_price, image_url:product_images(url), category:categories(name, slug)')
+          .eq('is_active', true);
 
-// Grid & Typography
-code = code.replace("lg:grid-cols-3 gap-6", "lg:grid-cols-4 gap-4 sm:gap-5");
-code = code.replace("text-2xl font-bold text-stone-800", "text-xl font-bold text-stone-800");
+        if (searchQuery) {
+          query = query.ilike('title', \`%\${searchQuery}%\`);
+        }
 
-// Product Card inside Shop
-code = code.replace("aspect-square bg-stone-50 relative overflow-hidden p-4", "aspect-square bg-stone-50 relative overflow-hidden p-2");
-code = code.replace("font-semibold text-stone-800 text-lg mb-2 truncate", "font-medium text-stone-800 text-sm mb-1 line-clamp-2 leading-snug whitespace-normal");
-code = code.replace("text-xs text-stone-400 mb-1 uppercase tracking-wider", "text-[10px] text-stone-500 mb-1 uppercase tracking-wider");
-code = code.replace("text-sm text-stone-400 line-through", "text-xs text-stone-400 line-through");
-code = code.replace(/span className="font-bold text-green-700">\{formatCurrency/g, 'span className="font-bold text-green-700 text-sm">{formatCurrency');
+        if (categoryParam) {
+          // Join on category handled in real app
+        }
 
-// Update to line-clamp plugin support if not present in tailwind config, actually line-clamp-2 is standard in v3.
-code = code.replace("mb-2 truncate", "mb-1 line-clamp-2 leading-snug whitespace-normal");
+        const [ { data: cats }, { data } ] = await Promise.all([
+          supabase.from('categories').select('*').eq('is_active', true),
+          query
+        ]);
+
+        if (cats) setCategories(cats.filter((c: any) => !['_owner_profile_', '_farmer_tips_', '_store_settings_', '_contact_messages_'].includes(c.slug)));
+        if (data) setProducts(data);`;
+
+const replace = `        let query = supabase
+          .from('products')
+          .select('id, title, slug, regular_price, discount_price, category_id, image_url:product_images(url), category:categories(name, slug)')
+          .eq('is_active', true);
+
+        if (searchQuery) {
+          query = query.ilike('title', \`%\${searchQuery}%\`);
+        }
+
+        const { data: cats } = await supabase.from('categories').select('*').eq('is_active', true);
+        
+        if (cats) {
+          setCategories(cats.filter((c: any) => !['_owner_profile_', '_farmer_tips_', '_store_settings_', '_contact_messages_'].includes(c.slug)));
+        }
+
+        if (categoryParam && cats) {
+          const targetCat = cats.find(c => c.slug === categoryParam);
+          if (targetCat) {
+            query = query.eq('category_id', targetCat.id);
+          }
+        }
+
+        const { data } = await query;
+        if (data) setProducts(data);`;
+
+code = code.replace(search, replace);
 
 fs.writeFileSync('src/pages/storefront/Shop.tsx', code);
+console.log("Shop.tsx patched");
